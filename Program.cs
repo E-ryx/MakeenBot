@@ -1,27 +1,25 @@
-namespace MakeenBot
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+using Telegram.Bot;
+using MakeenBot.Interfaces;
+using MakeenBot.Services;
+using MakeenBot.Repositories;
+using MakeenBot.Models;
 
-            // Add services to the container.
+var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
+// Extact Bot Configs.
+builder.Services.Configure<BotConfig>(builder.Configuration.GetSection("BotConfig"));
 
-            var app = builder.Build();
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
 
-            // Configure the HTTP request pipeline.
+var app = builder.Build();
 
-            app.UseHttpsRedirection();
+// Configure the HTTP request pipeline.
+app.UseHttpsRedirection();
+app.UseAuthorization();
 
-            app.UseAuthorization();
+app.MapControllers();
 
-
-            app.MapControllers();
-
-            app.Run();
-        }
-    }
-}
+app.Run();
