@@ -43,6 +43,8 @@ public class GroupController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Update update)
     {
+        // string jsonString = json.ToString();
+        // var update = _botService.ProcessUpdate(jsonString);
         if (update.Type == UpdateType.Message && update.Message?.Chat?.Type == ChatType.Group)
         {
             var msg = update.Message;

@@ -13,6 +13,7 @@ builder.Services.Configure<BotConfig>(builder.Configuration.GetSection("BotConfi
 builder.Services.AddControllers();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddSingleton<BotService>();
 
 var app = builder.Build();
 
