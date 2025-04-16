@@ -29,13 +29,16 @@ namespace MakeenBot.Repositories
                 workbook = new XLWorkbook(filePath);
                 var existingWorksheet = workbook.Worksheets.FirstOrDefault() ?? workbook.Worksheets.Add("Reports");
 
-                // Check if report number already exists
+                // Check if report number or date already exists
                 if (existingWorksheet.RowsUsed().Any(row => 
                     row.Cell(3).Value.ToString() == report.ReportNumber.ToString() &&
+                    row.Cell(2).Value.ToString() == report.NameTag) ||
+                    existingWorksheet.RowsUsed().Any(row => 
+                    row.Cell(1).Value.ToString() == report.PersianDate.ToString() &&
                     row.Cell(2).Value.ToString() == report.NameTag))
                 {
-                    // Report number already exists for this user, don't save
-                    return OperationResult.Fail($"گزارش با شماره {report.ReportNumber} ثبت شده. {report.NameTag}.");
+                    // Report number or date already exists for this user, don't save
+                    return OperationResult.Fail($"گزارش با شماره {report.ReportNumber} یا تاریخ {report.PersianDate} ثبت شده. {report.NameTag}.");
                 }
             }
             else
