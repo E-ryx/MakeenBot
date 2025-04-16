@@ -43,8 +43,6 @@ public class GroupController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Update update)
     {
-        // string jsonString = json.ToString();
-        // var update = _botService.ProcessUpdate(jsonString);
         if (update.Type == UpdateType.Message && update.Message?.Chat?.Type == ChatType.Group)
         {
             var msg = update.Message;
@@ -71,21 +69,21 @@ public class GroupController : ControllerBase
                     var result = await _reportRepository.SaveReportAsync(report);
                     if (!result.Success)
                     {
-                        // Report already exist.
-                        // await bot.SendTextMessageAsync(msg.Chat.Id, $"{result.Message}");
+                        //Report already exist.
+                         await bot.SendMessage(msg.Chat.Id, $"{result.Message}");
                     }
 
                     // Succes Submit.
-                    // await bot.SendTextMessageAsync(msg.Chat.Id, $"{result.Message}");
+                     await bot.SendMessage(msg.Chat.Id, $"{result.Message}");
 
                     // Optionally respond to group:
-                    //await bot.SendTextMessageAsync(msg.Chat.Id, $"📬 گزارش شما با موفقیت دریافت شد.");
+                    await bot.SendMessage(msg.Chat.Id, $"📬 گزارش شما با موفقیت دریافت شد.");
                 }
                 else
                 {
                     Console.WriteLine("Invalid report format.");
                     // Optionally respond to guide the user:
-                    // await bot.SendTextMessageAsync(msg.Chat.Id, $"❌ فرمت گزارش معتبر نیست. لطفاً مطابق نمونه ارسال کنید.");
+                     await bot.SendMessage(msg.Chat.Id, $"❌ فرمت گزارش معتبر نیست. لطفاً مطابق نمونه ارسال کنید.");
                 }
             }
             else
