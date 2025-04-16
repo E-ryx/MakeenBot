@@ -3,6 +3,8 @@ using MakeenBot.Interfaces;
 using MakeenBot.Services;
 using MakeenBot.Repositories;
 using MakeenBot.Models;
+using System.Net.Sockets;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,9 @@ builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddSingleton<BotService>();
 
 var app = builder.Build();
+
+// Set Server Ip and Port.
+app.Urls.Add("https://*:" + builder.Configuration["Port"]);
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
