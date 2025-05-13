@@ -15,12 +15,11 @@ builder.Services.Configure<BotConfig>(builder.Configuration.GetSection("BotConfi
 builder.Services.AddControllers();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
-builder.Services.AddSingleton<BotService>();
 
 var app = builder.Build();
 
 // Set Server Ip and Port.
-app.Urls.Add("https://*:" + builder.Configuration["Port"]);
+// app.Urls.Add("https://*:" + builder.Configuration["Port"]);
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();

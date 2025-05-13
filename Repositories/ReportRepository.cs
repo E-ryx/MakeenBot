@@ -38,7 +38,7 @@ namespace MakeenBot.Repositories
                     row.Cell(2).Value.ToString() == report.NameTag))
                 {
                     // Report number or date already exists for this user, don't save
-                    return OperationResult.Fail($"گزارش با شماره {report.ReportNumber} یا تاریخ {report.PersianDate} ثبت شده. {report.NameTag}.");
+                    return OperationResult.Fail($"گزارش با شماره {report.ReportNumber} یا تاریخ {report.PersianDate} قبلا ثبت شده است. {report.NameTag}.");
                 }
             }
             else
