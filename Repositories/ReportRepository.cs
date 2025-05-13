@@ -38,7 +38,7 @@ namespace MakeenBot.Repositories
                     row.Cell(2).Value.ToString() == report.NameTag))
                 {
                     // Report number or date already exists for this user, don't save
-                    return OperationResult.Fail($"گزارش با شماره {report.ReportNumber} یا تاریخ {report.PersianDate} قبلا ثبت شده است. {report.NameTag}.");
+                    return OperationResult.Fail($"{report.NameTag.Replace("_", " ")} عزیز\n⚠️ گزارشی با شماره {report.ReportNumber} یا تاریخ {report.PersianDate} قبلا ثبت شده است.\n لطفا گزارش جدید بفرستید.");
                 }
             }
             else
@@ -68,7 +68,7 @@ namespace MakeenBot.Repositories
 
             workbook.SaveAs(filePath);
 
-            return OperationResult.Ok($"گزارش {report.ReportNumber} با موفقیت ذخیره شد {report.NameTag}.");
+            return OperationResult.Ok($"{report.NameTag.Replace("_", " ")} عزیز\n✅ گزارش {report.ReportNumber} با موفقیت ذخیره شد.");
         }
     }
 }
