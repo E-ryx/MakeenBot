@@ -1,5 +1,6 @@
 using System;
 
+
 namespace MakeenBot.Models;
 
 public class BotConfig
