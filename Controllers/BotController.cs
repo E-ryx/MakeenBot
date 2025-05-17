@@ -2,95 +2,69 @@
 using Telegram.Bot.Types;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
-using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using MakeenBot.Interfaces;
 using MakeenBot.Repositories;
-using MakeenBot.Models;
 using Microsoft.Extensions.Options;
+using MakeenBot.Models.Entities;
+using MakeenBot.Models.ValueObjects;
 
 [ApiController]
 [Route("api/bot")]
 public class BotController : ControllerBase
 {
-    // Config's
-    private readonly BotConfig _setting;
-    private readonly string BotToken;
-    private readonly string CustomApiUrl;
-    private readonly string webhookUrl;
-    private readonly ITelegramBotClient bot;
-
-    // Service's
+    private readonly BotConfig _settings;
+    private readonly ITelegramBotClient _bot;
     private readonly IReportService _reportService;
     private readonly IReportRepository _reportRepository;
 
     public BotController(IReportService reportService, IReportRepository reportRepository, IOptions<BotConfig> options)
     {
-        // Config's.
-        _setting = options.Value;
-        BotToken = _setting.Token;
-        CustomApiUrl = _setting.BaleApi;
-        webhookUrl = _setting.Webhook;
-        bot = new TelegramBotClient(new TelegramBotClientOptions(BotToken, CustomApiUrl));
-        
-        // Service's.
+        _settings = options.Value;
+        _bot = new TelegramBotClient(new TelegramBotClientOptions(_settings.Token, _settings.BaleApi));
         _reportService = reportService;
         _reportRepository = reportRepository;
     }
-    
+
     [HttpGet("setWebhook")]
     public async Task<string> SetWebHook(CancellationToken ct)
     {
-        await bot.SetWebhook(webhookUrl, allowedUpdates: [], cancellationToken: ct);
-        return $"Webhook set to {webhookUrl}";
+        await _bot.SetWebhook(_settings.Webhook, allowedUpdates: null, cancellationToken: ct);
+        return $"Webhook set to {_settings.Webhook}";
     }
 
     [HttpPost("reports")]
-    public async Task<IActionResult> Reports([FromBody] Update update)
+    public async Task<IActionResult> GetReports([FromBody] Update update)
     {
-        if (update.Type == UpdateType.Message && update.Message?.Chat?.Type == ChatType.Group)
+        if (IsValidGroupMessage(update))
         {
             var msg = update.Message;
-            var text = msg.Text ?? "";
-            var user = msg.From?.Username ?? "Unknown";
-            var firstName = msg.From?.FirstName ?? "Unknown";
-            var group = msg.Chat.Title ?? "Unknown Group";
+            var text = msg.Text ?? string.Empty;
 
             if (text.Contains("#گزارش_روزانه", StringComparison.OrdinalIgnoreCase))
             {
-                
-                Console.WriteLine("Report Detected. Validating...");
-
-                // Parse Report.
-                var report = _reportService.ParseDailyReport(text);
-
-                if (report != null)
-                {
-                    // Console Log's
-                    Console.WriteLine("Valid Report!");
-                    Console.WriteLine($"Name: {report.NameTag}");
-                    Console.WriteLine($"Date: {report.PersianDate}");
-                    Console.WriteLine($"WorkHour: {report.WorkHour}");
-                    Console.WriteLine($"ReportNumber: {report.ReportNumber}");
-
-                    // Save Reports.
-                    var result = await _reportRepository.SaveReportAsync(report);
-
-                    // Response Message.
-                     await bot.SendMessage(msg.Chat.Id, $"{result.Message}");
-                }
-                else
-                {
-                    Console.WriteLine("Invalid report format.");
-                    // Response Message: Not Valid Report Format.
-                     await bot.SendMessage(msg.Chat.Id, $"❌ فرمت گزارش معتبر نیست. لطفاً مطابق نمونه ارسال کنید.");
-                }
-            }
-            else
-            {
-                // Console Log's
-                Console.WriteLine($"[{group}] {user} ({firstName}): {text}");
+                return await HandleDailyReport(msg, text);
             }
         }
+
+        return Ok();
+    }
+
+    private bool IsValidGroupMessage(Update update)
+    {
+        return update.Type == UpdateType.Message && update.Message?.Chat?.Type == ChatType.Group;
+    }
+
+    private async Task<IActionResult> HandleDailyReport(Message msg, string text)
+    {
+        var report = _reportService.ParseDailyReport(text);
+
+        if (report == null)
+            await _bot.SendMessage(msg.Chat.Id, "❌ فرمت گزارش معتبر نیست. لطفاً مطابق نمونه ارسال کنید.");
+
+        var result = await _reportRepository.SaveReportAsync(report);
+        await _bot.SendMessage(msg.Chat.Id, $"{result.Message}");
 
         return Ok();
     }

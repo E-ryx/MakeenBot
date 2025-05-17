@@ -1,0 +1,24 @@
+﻿namespace MakeenBot.Models.Entities
+{
+    public class Student
+    {
+        public int Id { get; private set; }
+        public string Name { get; private set; }
+        public string BaleId { get; private set; }
+        public string PhoneNumber { get; set; }
+
+        public int CourseId { get; private set; }
+        public Course Course { get; private set; }
+
+        public ICollection<Report> Reports { get; private set; } = new List<Report>();
+
+        private Student() { }
+
+        public Student(string name, int courseId, string baleId)
+        {
+            Name = name;
+            CourseId = courseId;
+            BaleId = baleId;
+        }
+    }
+}

@@ -1,6 +1,6 @@
 using System;
 
-namespace MakeenBot.Models;
+namespace MakeenBot.Models.ValueObjects;
 
 public class BotConfig
 {

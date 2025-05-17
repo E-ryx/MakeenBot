@@ -2,9 +2,11 @@ using Telegram.Bot;
 using MakeenBot.Interfaces;
 using MakeenBot.Services;
 using MakeenBot.Repositories;
-using MakeenBot.Models;
 using System.Net.Sockets;
 using System.Net;
+using MakeenBot.Data;
+using Microsoft.EntityFrameworkCore;
+using MakeenBot.Models.ValueObjects;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,10 @@ builder.Services.Configure<BotConfig>(builder.Configuration.GetSection("BotConfi
 builder.Services.AddControllers();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
+
+// Add services to the container
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
