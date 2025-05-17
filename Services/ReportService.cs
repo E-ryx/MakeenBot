@@ -1,44 +1,42 @@
 ﻿using MakeenBot.Models;
-using static System.Net.Mime.MediaTypeNames;
 using System.Text.RegularExpressions;
 using Telegram.Bot.Types;
 using MakeenBot.Interfaces;
 
 namespace MakeenBot.Services
 {
-    public class ReportService: IReportService
+    public class ReportService : IReportService
     {
         public DailyReport? ParseDailyReport(string text)
-{
-    var report = new DailyReport();
+        {
+            var report = new DailyReport();
 
-    var dateMatch = Regex.Match(text, @"تاریخ:\s*(\d{2}/\d{2}/\d{4})");
-    if (dateMatch.Success)
-        report.PersianDate = dateMatch.Groups[1].Value.Trim();
+            report.PersianDate = ExtractMatch(text, @"تاریخ:\s*(\d{2}/\d{2}/\d{4})", 1);
+            report.NameTag = ExtractMatch(text, @"نام و نام خانوادگی:\s*(#([\u0600-\u06FF_]+))", 2);
+            report.ReportNumber = ExtractIntMatch(text, @"شماره گزارش:\s*(\d+)");
+            report.WorkHour = ExtractIntMatch(text, @"مجموع ساعت:\s*(\d+)");
 
-    var nameMatch = Regex.Match(text, @"نام و نام خانوادگی:\s*(#([\u0600-\u06FF_]+))");
-    if (nameMatch.Success)
-        report.NameTag = nameMatch.Groups[2].Value;
+            return IsReportValid(report) ? report : null;
+        }
 
-    var reportNumMatch = Regex.Match(text, @"شماره گزارش:\s*(\d+)");
-    if (reportNumMatch.Success && int.TryParse(reportNumMatch.Groups[1].Value, out int number))
-        report.ReportNumber = number;
+        private string? ExtractMatch(string text, string pattern, int groupIndex)
+        {
+            var match = Regex.Match(text, pattern);
+            return match.Success ? match.Groups[groupIndex].Value.Trim() : null;
+        }
 
-    var totalHoursMatch = Regex.Match(text, @"مجموع ساعت:\s*(\d+)");
-    if (totalHoursMatch.Success && int.TryParse(totalHoursMatch.Groups[1].Value, out int totalHours))
-        report.WorkHour = totalHours; // Assuming you've added this to your model
+        private int? ExtractIntMatch(string text, string pattern)
+        {
+            var match = Regex.Match(text, pattern);
+            return match.Success && int.TryParse(match.Groups[1].Value, out int number) ? number : (int?)null;
+        }
 
-    if (!string.IsNullOrEmpty(report.PersianDate)
-        && !string.IsNullOrEmpty(report.NameTag)
-        && report.ReportNumber.HasValue
-        && report.WorkHour.HasValue)
-    {
-        return report;
-    }
-
-    return null;
-}
-
-
+        private bool IsReportValid(DailyReport report)
+        {
+            return !string.IsNullOrEmpty(report.PersianDate) &&
+                   !string.IsNullOrEmpty(report.NameTag) &&
+                   report.ReportNumber.HasValue &&
+                   report.WorkHour.HasValue;
+        }
     }
 }

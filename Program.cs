@@ -2,9 +2,11 @@ using Telegram.Bot;
 using MakeenBot.Interfaces;
 using MakeenBot.Services;
 using MakeenBot.Repositories;
-using MakeenBot.Models;
 using System.Net.Sockets;
 using System.Net;
+using MakeenBot.Data;
+using Microsoft.EntityFrameworkCore;
+using MakeenBot.Models.ValueObjects;
 
 var builder = WebApplication.CreateBuilder(args);
 
