@@ -1,6 +1,6 @@
 ﻿using MakeenBot.Models;
 
-namespace MakeenBot.Interfaces
+namespace MakeenBot.Interfaces.Services
 {
     public interface IReportService
     {
