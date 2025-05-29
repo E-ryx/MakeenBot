@@ -1,11 +1,7 @@
-using System;
 using MakeenBot.Models;
-using MakeenBot.Interfaces;
 using ClosedXML.Excel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using MakeenBot.Models.ValueObjects;
+using MakeenBot.Interfaces.Repositories;
 
 namespace MakeenBot.Repositories
 {

@@ -2,13 +2,10 @@
 using Telegram.Bot.Types;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
-using System.Threading;
-using System.Threading.Tasks;
-using MakeenBot.Interfaces;
-using MakeenBot.Repositories;
 using Microsoft.Extensions.Options;
-using MakeenBot.Models.Entities;
 using MakeenBot.Models.ValueObjects;
+using MakeenBot.Interfaces.Repositories;
+using MakeenBot.Interfaces.Services;
 
 [ApiController]
 [Route("api/bot")]
