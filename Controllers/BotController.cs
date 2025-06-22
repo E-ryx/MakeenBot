@@ -34,8 +34,8 @@ public class BotController : ControllerBase
         return $"Webhook set to {_settings.Webhook}";
     }
 
-    [HttpPost("reports")]
-    public async Task<IActionResult> GetReports([FromBody] Update update)
+    [HttpPost("update")]
+    public async Task<IActionResult> GetUpdate([FromBody] Update update)
     {
         if (IsValidGroupMessage(update))
         {
@@ -51,10 +51,6 @@ public class BotController : ControllerBase
         return Ok();
     }
 
-    private bool IsValidGroupMessage(Update update)
-    {
-        return update.Type == UpdateType.Message && update.Message?.Chat?.Type == ChatType.Group;
-    }
 
     private async Task<IActionResult> HandleDailyReport(Message msg, string text)
     {
