@@ -16,7 +16,7 @@ namespace MakeenBot.Handlers
         }
     private bool IsAddReport(Update update)
     {
-        return update.Type == UpdateType.Message && update.Message?.Chat?.Type == ChatType.Group;
+        return ;
     }
     }
 }

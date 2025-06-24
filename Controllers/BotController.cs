@@ -9,6 +9,7 @@ using MakeenBot.Repositories;
 using Microsoft.Extensions.Options;
 using MakeenBot.Models.Entities;
 using MakeenBot.Models.ValueObjects;
+using MakeenBot.Interfaces.Validators;
 
 [ApiController]
 [Route("api/bot")]
@@ -18,13 +19,15 @@ public class BotController : ControllerBase
     private readonly ITelegramBotClient _bot;
     private readonly IReportService _reportService;
     private readonly IReportRepository _reportRepository;
+    private readonly IReportValidator _reportValidator;
 
-    public BotController(IReportService reportService, IReportRepository reportRepository, IOptions<BotConfig> options)
+    public BotController(IReportService reportService, IReportRepository reportRepository, IOptions<BotConfig> options, IReportValidator reportValidator)
     {
         _settings = options.Value;
         _bot = new TelegramBotClient(new TelegramBotClientOptions(_settings.Token, _settings.BaleApi));
         _reportService = reportService;
         _reportRepository = reportRepository;
+        _reportValidator = reportValidator;
     }
 
     [HttpGet("setWebhook")]
@@ -37,15 +40,23 @@ public class BotController : ControllerBase
     [HttpPost("update")]
     public async Task<IActionResult> GetUpdate([FromBody] Update update)
     {
-        if (IsValidGroupMessage(update))
+        var response = _reportValidator.ValidateReport(update);
+        if (!response.IsValid)
         {
-            var msg = update.Message;
-            var text = msg.Text ?? string.Empty;
+            // var msg = update.Message;
+            // var text = msg.Text ?? string.Empty;
 
-            if (text.Contains("#گزارش_روزانه", StringComparison.OrdinalIgnoreCase))
-            {
-                return await HandleDailyReport(msg, text);
-            }
+            // if (text.Contains("#گزارش_روزانه", StringComparison.OrdinalIgnoreCase))
+            // {
+            //     return await HandleDailyReport(msg, text);
+            // }
+            
+            await _bot.SendMessage(response.ErrorMessage);
+        }
+
+        if (update.Type == UpdateType.Message && update.Message?.Chat?.Type == ChatType.Group)
+        {
+            // Go to ReportService.AddReport
         }
 
         return Ok();
