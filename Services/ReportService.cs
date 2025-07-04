@@ -2,19 +2,20 @@
 using System.Text.RegularExpressions;
 using Telegram.Bot.Types;
 using MakeenBot.Interfaces;
+using MakeenBot.Models.ValueObjects;
 
 namespace MakeenBot.Services
 {
     public class ReportService : IReportService
     {
-        public DailyReport? ParseDailyReport(string text)
+        public ReportDto? ParseDailyReport(string text)
         {
-            var report = new DailyReport();
+            var report = new ReportDto();
 
-            report.PersianDate = ExtractMatch(text, @"تاریخ:\s*(\d{2}/\d{2}/\d{4})", 1);
-            report.NameTag = ExtractMatch(text, @"نام و نام خانوادگی:\s*(#([\u0600-\u06FF_]+))", 2);
-            report.ReportNumber = ExtractIntMatch(text, @"شماره گزارش:\s*(\d+)");
-            report.WorkHour = ExtractIntMatch(text, @"مجموع ساعت:\s*(\d+)");
+            report.Date = ExtractMatch(text, @"تاریخ:\s*(\d{2}/\d{2}/\d{4})", 1);
+            report.StudentName = ExtractMatch(text, @"نام و نام خانوادگی:\s*(#([\u0600-\u06FF_]+))", 2);
+            report.ReportNumber = ConvertPersianDigitsToEnglish(ExtractMatch(text, @"شماره گزارش:\s*(\d+)", 3));
+            report.WorkHour = ConvertPersianDigitsToEnglish(ExtractMatch(text, @"مجموع ساعت:\s*(\d+)", 4));
 
             return IsReportValid(report) ? report : null;
         }
@@ -25,18 +26,28 @@ namespace MakeenBot.Services
             return match.Success ? match.Groups[groupIndex].Value.Trim() : null;
         }
 
-        private int? ExtractIntMatch(string text, string pattern)
+        private bool IsReportValid(ReportDto report)
         {
-            var match = Regex.Match(text, pattern);
-            return match.Success && int.TryParse(match.Groups[1].Value, out int number) ? number : (int?)null;
-        }
-
-        private bool IsReportValid(DailyReport report)
-        {
-            return !string.IsNullOrEmpty(report.PersianDate) &&
-                   !string.IsNullOrEmpty(report.NameTag) &&
+            return !string.IsNullOrEmpty(report.Date) &&
+                   !string.IsNullOrEmpty(report.StudentName) &&
                    report.ReportNumber.HasValue &&
                    report.WorkHour.HasValue;
         }
+        private int? ConvertPersianDigitsToEnglish(string input)
+    {
+        string englishDigits = input
+        .Replace("۰", "0")
+        .Replace("۱", "1")
+        .Replace("۲", "2")
+        .Replace("۳", "3")
+        .Replace("۴", "4")
+        .Replace("۵", "5")
+        .Replace("۶", "6")
+        .Replace("۷", "7")
+        .Replace("۸", "8")
+        .Replace("۹", "9");
+
+    return int.TryParse(englishDigits, out int result) ? result : (int?)null;
+    }
     }
 }

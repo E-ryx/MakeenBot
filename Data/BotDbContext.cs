@@ -6,12 +6,12 @@ using MakeenBot.Models.Entities;
 
 namespace MakeenBot.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class BotDbContext : DbContext
     {
         public DbSet<Student> Students { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Report> Reports { get; set; }
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public BotDbContext(DbContextOptions<BotDbContext> options)
             : base(options)
         {
         }

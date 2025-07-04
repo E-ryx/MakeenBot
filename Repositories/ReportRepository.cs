@@ -6,12 +6,25 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MakeenBot.Models.ValueObjects;
+using MakeenBot.Models.Entities;
+using MakeenBot.Data;
 
 namespace MakeenBot.Repositories
 {
     public class ReportRepository : IReportRepository
     {
         private readonly string _folderPath = "Reports";
+        private readonly BotDbContext _context;
+
+        public ReportRepository(BotDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task SaveReportAsync(Report report)
+        {
+            await _context.Reports.AddAsync(report);
+        }
 
         public async Task<OperationResult> SaveReportAsync(DailyReport report)
         {
@@ -31,10 +44,10 @@ namespace MakeenBot.Repositories
                 var existingWorksheet = workbook.Worksheets.FirstOrDefault() ?? workbook.Worksheets.Add("Reports");
 
                 // Check if report number or date already exists
-                if (existingWorksheet.RowsUsed().Any(row => 
+                if (existingWorksheet.RowsUsed().Any(row =>
                     row.Cell(3).Value.ToString() == report.ReportNumber.ToString() &&
                     row.Cell(2).Value.ToString() == report.NameTag) ||
-                    existingWorksheet.RowsUsed().Any(row => 
+                    existingWorksheet.RowsUsed().Any(row =>
                     row.Cell(1).Value.ToString() == report.PersianDate.ToString() &&
                     row.Cell(2).Value.ToString() == report.NameTag))
                 {
