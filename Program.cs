@@ -11,22 +11,41 @@ using MakeenBot.Interfaces.Services;
 using MakeenBot.Interfaces.Repositories;
 using MakeenBot.Interfaces.Validators;
 using MakeenBot.Infrastructure.Repositories;
+using MakeenBot.Interfaces.Handlers;
+using MakeenBot.Handlers.WelcomeMessage;
+using MakeenBot.Handlers.Course;
+using MakeenBot.Handlers.Report;
+using MakeenBot.Handlers.StartMessage;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Extact Bot Configs.
+// Extact Bot Config's
 builder.Services.Configure<BotConfig>(builder.Configuration.GetSection("BotConfig"));
 
-// Add services to the container.
+// Inject Service's
 builder.Services.AddControllers();
+
+// Service's
 builder.Services.AddScoped<IReportService, ReportService>();
+
+// Repositorie's
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-builder.Services.AddScoped<IReportValidator, ReportValidator>();
-builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
-// Add services to the container
+// Validator's
+builder.Services.AddScoped<IReportValidator, ReportValidator>();
+
+// Handler's
+builder.Services.AddScoped<IBotCommandHandler, EditWelcomeMessageHandler>();
+builder.Services.AddScoped<IBotCommandHandler, AddCourseHandler>();
+builder.Services.AddScoped<IBotCommandHandler, EditCourseHandler>();
+builder.Services.AddScoped<IBotCommandHandler, ExportReportHandler>();
+builder.Services.AddScoped<IBotCommandHandler, AddReportHandler>();
+builder.Services.AddScoped<IBotCommandHandler, StartMessageHandler>();
+
+
+// DbContext
 builder.Services.AddDbContext<BotDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

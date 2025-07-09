@@ -2,325 +2,87 @@
 using Telegram.Bot.Types;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
-using System.Threading;
-using System.Threading.Tasks;
 using MakeenBot.Interfaces;
+using MakeenBot.Models.ValueObjects;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
-using MakeenBot.Interfaces.Services;
-using MakeenBot.Models.ValueObjects;
-using MakeenBot.Services;
-using System.Globalization;
-using MakeenBot.Models.Entities;
+using MakeenBot.Interfaces.Handlers;
 
 [ApiController]
 [Route("api/bot")]
 public class BotController : ControllerBase
 {
     private readonly ITelegramBotClient _bot;
-    private readonly IReportService _reportService;
-    private readonly IExportService _exportService;
-    private readonly ICourseRepository _courseRepository;
+    private readonly IEnumerable<IBotCommandHandler> _commandHandlers;
     private readonly BotConfig _settings;
     private readonly ILogger<BotController> _logger;
 
     public BotController(
-        IReportService reportService,
         IOptions<BotConfig> options,
         ILogger<BotController> logger,
-        IExportService exportService,
-        ICourseRepository courseRepository)
+        IEnumerable<IBotCommandHandler> commandHandlers)
     {
         _settings = options.Value;
         _bot = new TelegramBotClient(new TelegramBotClientOptions(_settings.Token, _settings.BaleApi));
-        _reportService = reportService;
-        _exportService = exportService;
         _logger = logger;
-        _courseRepository = courseRepository;
+        _commandHandlers = commandHandlers;
     }
 
     [HttpGet("setWebhook")]
     public async Task<string> SetWebhook(CancellationToken ct)
     {
-        await _bot.SetWebhook(_settings.Webhook, allowedUpdates: null, cancellationToken: ct);
+        await _bot.SetWebhook(_settings.Webhook, cancellationToken: ct);
         return $"✅ Webhook set to {_settings.Webhook}";
     }
 
     [HttpPost("update")]
     public async Task<IActionResult> ReceiveUpdate([FromBody] Update update)
     {
-        // Welcome Message
-        //if (update.Type == UpdateType.MyChatMember && update.MyChatMember is { } myChatMember)
-        //{
-        //    var oldStatus = myChatMember.OldChatMember.Status;
-        //    var newStatus = myChatMember.NewChatMember.Status;
-
-        //    // بررسی اینکه ربات به گروه اضافه شده
-        //    if ((oldStatus == ChatMemberStatus.Left || oldStatus == ChatMemberStatus.Kicked) &&
-        //        (newStatus == ChatMemberStatus.Member || newStatus == ChatMemberStatus.Administrator))
-        //    {
-        //        var welcomePath = Path.Combine("Messages", "WelcomeMessage.md");
-        //        var welcomeText = await System.IO.File.ReadAllTextAsync(welcomePath);
-
-        //        await _bot.SendMessage(
-        //            chatId: myChatMember.Chat.Id,
-        //            text: welcomeText
-        //        );
-
-        //    }
-
-        //    return Ok(); // چون از نوع خاصیه، بعد از رسیدگی بلافاصله return کنیم
-        //}
-        if (update.Message?.NewChatMembers != null && update.Message.NewChatMembers.Any(b => b.IsBot && b.Id == _settings.BotId))
-        {
-            var chatId = update.Message.Chat.Id;
-            var welcomePath = Path.Combine("Messages", "WelcomeMessage.md");
-            var welcomeText = await System.IO.File.ReadAllTextAsync(welcomePath);
-
-            await _bot.SendMessage(
-                chatId: chatId,
-                text: welcomeText
-            );
-
-            return Ok();
-        }
-
-        var message = update.Type switch
-        {
-            UpdateType.Message => update.Message,
-            UpdateType.EditedMessage => update.EditedMessage,
-            _ => null
-        };
-
-        if (message?.Chat?.Type == ChatType.Channel)
-            return Ok(); 
-
-        var text = message.Text?.Trim();
-        if (string.IsNullOrWhiteSpace(text))
-            return Ok();
-
-        //// --- بررسی دسترسی ---
-        //if (message.Chat.Type != ChatType.Private || message.From?.Id != _settings.AuthorizedUserId)
-        //    return Ok(); // دسترسی غیرمجاز
-
-        if (text.StartsWith("/welcome-message", StringComparison.OrdinalIgnoreCase))
-        {
-            // فقط ادمین مجاز باشه
-            if (message.From?.Id != _settings.AuthorizedUserId)
-            {
-                //await _bot.SendMessage(message.Chat.Id, "⛔ شما اجازه‌ی تغییر پیام خوش‌آمدگویی را ندارید.");
-                return Ok();
-            }
-
-            var lines = text.Split('\n').ToList();
-            if (lines.Count < 2)
-            {
-                await _bot.SendMessage(message.Chat.Id, "❌ برای تنظیم پیام خوش‌آمدگویی، لطفاً دستور را به این صورت بنویسید:\n\n/welcome-message\nمتن پیام شما");
-                return Ok();
-            }
-
-            var newMessage = string.Join('\n', lines.Skip(1)).Trim();
-
-            var welcomePath = Path.Combine("Messages", "WelcomeMessage.md");
-
-            try
-            {
-                Directory.CreateDirectory("Messages"); // اطمینان از وجود پوشه
-                await System.IO.File.WriteAllTextAsync(welcomePath, newMessage);
-
-                await _bot.SendMessage(message.Chat.Id, "✅ پیام خوش‌آمدگویی با موفقیت ذخیره شد.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطا در ذخیره پیام خوش‌آمدگویی");
-                await _bot.SendMessage(message.Chat.Id, "❌ خطایی در ذخیره پیام رخ داد.");
-            }
-
-            return Ok();
-        }
-
-
         try
         {
-            if (text.StartsWith("/گزارش خروجی"))
+            // 1️⃣ پیام خوش‌آمدگویی هنگام اضافه شدن ربات
+            if (update.Message?.NewChatMembers != null &&
+                update.Message.NewChatMembers.Any(m => m.IsBot && m.Id == _settings.BotId))
             {
-            // فقط ادمین مجاز باشه
-            if (message.From?.Id != _settings.AuthorizedUserId)
-            {
-                await _bot.SendMessage(message.Chat.Id, "⛔ شما اجازه‌ی تغییر پیام خوش‌آمدگویی را ندارید.");
-                return Ok();
-            }
-                var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-                var courseName = lines.FirstOrDefault(l => l.StartsWith("دوره:"))?.Split(':')[1].Trim();
-                var fromDateStr = lines.FirstOrDefault(l => l.StartsWith("از:"))?.Split(':')[1].Trim();
-                var toDateStr = lines.FirstOrDefault(l => l.StartsWith("تا:"))?.Split(':')[1].Trim();
+                var welcomePath = Path.Combine("Messages", "WelcomeMessage.md");
+                var welcomeText = await System.IO.File.ReadAllTextAsync(welcomePath);
 
-                if (courseName == null || fromDateStr == null || toDateStr == null)
-                {
-                    await _bot.SendMessage(message.Chat.Id, "❌ فرمت پیام نادرست است. لطفاً دوره، از، و تا را مشخص کنید."
-                        //, replyToMessageId: message.MessageId
-                        );
-                    return Ok();
-                }
+                await _bot.SendMessage(
+                    chatId: update.Message.Chat.Id,
+                    text: welcomeText,
+                    parseMode: ParseMode.Markdown
+                );
 
-                var startDate = ParsePersianDate(fromDateStr);
-                var endDate = ParsePersianDate(toDateStr);
-
-                //var exportService = HttpContext.RequestServices.GetRequiredService<ExportService>();
-                var stream = await _exportService.ExportReportsToExcelAsync(courseName, startDate, endDate);
-                if (stream == null)
-                {
-                    await _bot.SendMessage(message.Chat.Id, "❌ دوره‌ای با این نام یافت نشد."
-                        //, replyToMessageId: message.MessageId
-                        );
-                    return Ok();
-                }
-
-                stream.Position = 0;
-                //await _bot.SendDocument(
-                //    chatId: message.Chat.Id,
-                //    document: new Telegram.Bot.Types.InputFileStream(stream, $"{courseName}.xlsx"),
-                //    caption: $"از تاریخ {fromDateStr} تا {toDateStr}"
-                //    //,replyToMessageId: message.MessageId
-                //);
-
-                //return Ok();
-                return File(
-                    fileStream: stream,
-        contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        fileDownloadName: $"{courseName}.xlsx"
-                    );
-            }
-
-            if (text.StartsWith("/add-course", StringComparison.OrdinalIgnoreCase))
-            {
-                var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-
-                var courseLine = lines.FirstOrDefault(l => l.StartsWith("اسم دوره:", StringComparison.OrdinalIgnoreCase));
-                var courseName = courseLine?.Split(':')[1].Trim();
-
-
-                var studentSectionIndex = Array.FindIndex(lines, l => l.StartsWith("دانشجو های دوره:", StringComparison.OrdinalIgnoreCase));
-                if (courseName == null || studentSectionIndex == -1 || studentSectionIndex + 1 >= lines.Length)
-                {
-                    await _bot.SendMessage(message.Chat.Id, "❌ فرمت پیام نامعتبر است. لطفاً از ساختار صحیح استفاده کنید.");
-                    return Ok();
-                }
-
-                if (await _courseRepository.ExistsAsync(courseName))
-                {
-                    await _bot.SendMessage(message.Chat.Id, $"⚠️ دوره‌ای با نام «{courseName}» از قبل وجود دارد.");
-                    return Ok(new { success = false, message = "Course already exists" });
-                }
-
-                var studentLines = lines
-                    .Skip(studentSectionIndex + 1)
-                    .Where(l => !string.IsNullOrWhiteSpace(l))
-                    .Select(l => l.TrimStart('-', ' ', '\t').Trim())
-                    .Where(l => !string.IsNullOrWhiteSpace(l))
-                    .ToList();
-
-                if (!studentLines.Any())
-                {
-                    await _bot.SendMessage(message.Chat.Id, "❌ هیچ دانشجویی در پیام وارد نشده است.");
-                    return Ok();
-                }
-
-                var course = new Course(courseName);
-                foreach (var student in studentLines)
-                {
-                    course.Students.Add(new Student(student, course.Id));
-                }
-
-                await _courseRepository.AddAsync(course);
-
-                await _bot.SendMessage(message.Chat.Id, $"✅ دوره «{courseName}» با {course.Students.Count} دانشجو با موفقیت ثبت شد.");
                 return Ok();
             }
 
-            // Update Course
-            if (text.StartsWith("/edit-course", StringComparison.OrdinalIgnoreCase))
+            // 2️⃣ بررسی نوع آپدیت و متن پیام
+            var message = update.Type switch
             {
-                var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                UpdateType.Message => update.Message,
+                UpdateType.EditedMessage => update.EditedMessage,
+                _ => null
+            };
 
-                var courseLine = lines.FirstOrDefault(l => l.StartsWith("اسم دوره:", StringComparison.OrdinalIgnoreCase));
-                var courseName = courseLine?.Split(':')[1].Trim();
-
-                var studentSectionIndex = Array.FindIndex(lines, l => l.StartsWith("دانشجو های دوره:", StringComparison.OrdinalIgnoreCase));
-                if (courseName == null || studentSectionIndex == -1 || studentSectionIndex + 1 >= lines.Length)
-                {
-                    await _bot.SendMessage(message.Chat.Id, "❌ فرمت پیام نامعتبر است. لطفاً از ساختار صحیح استفاده کنید.");
-                    return Ok();
-                }
-
-                var existingCourse = await _courseRepository.GetByNameAsync(courseName);
-                if (existingCourse == null)
-                {
-                    await _bot.SendMessage(message.Chat.Id, $"❌ دوره‌ای با نام «{courseName}» یافت نشد.");
-                    return Ok(new { success = false, message = "Course not found" });
-                }
-
-                var studentLines = lines
-                    .Skip(studentSectionIndex + 1)
-                    .Where(l => !string.IsNullOrWhiteSpace(l))
-                    .Select(l => l.TrimStart('-', ' ', '\t').Trim())
-                    .Where(l => !string.IsNullOrWhiteSpace(l))
-                    .ToList();
-
-                if (!studentLines.Any())
-                {
-                    await _bot.SendMessage(message.Chat.Id, "❌ هیچ دانشجویی در پیام وارد نشده است.");
-                    return Ok();
-                }
-                var newStudents = studentLines.Select(name => new Student(name, existingCourse.Id)).ToList();
-                await _courseRepository.UpdateStudentsAsync(existingCourse, newStudents);
-
-                await _bot.SendMessage(message.Chat.Id, $"✅ دوره «{courseName}» با {existingCourse.Students.Count} دانشجو بروزرسانی شد.");
+            if (message == null || string.IsNullOrWhiteSpace(message.Text))
                 return Ok();
+
+            // 3️⃣ سپردن به CommandHandler مناسب
+            foreach (var handler in _commandHandlers)
+            {
+                if (handler.CanHandle(message.Text))
+                {
+                    await handler.HandleAsync(message);
+                    return Ok();
+                }
             }
 
-            // --- گزارش روزانه ---
-            if (!text.Contains("#گزارش_روزانه", StringComparison.OrdinalIgnoreCase))
-                return Ok();
-
-            var isEdit = update.Type == UpdateType.EditedMessage;
-
-            var (isSuccess, responseMessage) = await _reportService.HandleReportSubmissionAsync(
-                text,
-                isEdit: isEdit
-            );
-
-            //await _bot.SendMessage(
-            //    chatId: message.Chat.Id,
-            //    text: responseMessage,
-            //    replyParameters: new() { MessageId = message.MessageId },
-            //    cancellationToken: CancellationToken.None
-            //);
-
-            return Ok(new { success = isSuccess, message = responseMessage });
+            return Ok(); // پیام‌هایی که نیاز به پاسخ ندارند
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ خطا در پردازش پیام");
-
-            await _bot.SendMessage(
-                chatId: message.Chat.Id,
-                text: "❌ مشکلی در پردازش پیام پیش آمد.",
-                cancellationToken: CancellationToken.None
-            );
-
+            _logger.LogError(ex, "❌ خطا در پردازش آپدیت");
             return StatusCode(500, "Internal Server Error");
         }
     }
-
-    private DateTime ParsePersianDate(string persianDate)
-    {
-        var parts = persianDate.Split('/');
-        int year = int.Parse(parts[0]);
-        int month = int.Parse(parts[1]);
-        int day = int.Parse(parts[2]);
-        var pc = new PersianCalendar();
-        return pc.ToDateTime(year, month, day, 0, 0, 0, 0);
-    }
-
 }
