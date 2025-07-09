@@ -38,7 +38,7 @@ public class ReportService : IReportService
         if (errors.Any())
             return (false, string.Join("\n", errors));
 
-        var student = await _studentRepository.GetByNameAsync("#" + reportDto!.StudentName);
+        var student = await _studentRepository.GetByNameAsync(reportDto!.StudentName);
         if (student == null)
             return (false, "❌ دانشجویی با این نام پیدا نشد.");
 

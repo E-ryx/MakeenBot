@@ -30,9 +30,10 @@ public class ReportValidator : IReportValidator
             return (null, errors);
         }
 
-        report.StudentName = nameMatch.Groups[1].Value.Trim();
-        var student = await _studentRepository.GetByNameAsync("#" + report.StudentName);
-        if (student == null)
+        var rawName = nameMatch.Groups[1].Value.Trim();
+        report.StudentName = rawName.Replace("_", " ").Trim();
+
+        var student = await _studentRepository.GetByNameAsync(report.StudentName); if (student == null)
         {
             errors.Add("❌ دانشجویی با این نام پیدا نشد.");
             return (null, errors);
