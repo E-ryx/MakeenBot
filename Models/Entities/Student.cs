@@ -4,8 +4,8 @@
     {
         public int Id { get; private set; }
         public string Name { get; private set; }
-        public string BaleId { get; private set; }
-        public string PhoneNumber { get; set; }
+        //public string BaleId { get; private set; }
+        //public string PhoneNumber { get; set; }
 
         public int CourseId { get; private set; }
         public Course Course { get; private set; }
@@ -14,11 +14,10 @@
 
         private Student() { }
 
-        public Student(string name, int courseId, string baleId)
+        public Student(string name, int courseId)
         {
             Name = name;
             CourseId = courseId;
-            BaleId = baleId;
         }
     }
 }

@@ -4,6 +4,7 @@ namespace MakeenBot.Interfaces.Services
 {
     public interface IReportService
     {
-        public DailyReport? ParseDailyReport(string text);
+        Task<(bool IsSuccess, string Message)> HandleReportSubmissionAsync(string messageText, bool isEdit = false);
+
     }
 }

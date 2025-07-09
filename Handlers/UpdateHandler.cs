@@ -4,19 +4,19 @@ using Telegram.Bot.Types.Enums;
 
 namespace MakeenBot.Handlers
 {
-    public class UpdateHandler
-    {
-        public void Handle(Update update)
-        {
-            if (IsAddReport(update))
-            {
+    //public class UpdateHandler
+    //{
+    //    public void Handle(Update update)
+    //    {
+    //        if (IsAddReport(update))
+    //        {
                 
-            }
+    //        }
 
-        }
-    private bool IsAddReport(Update update)
-    {
-        return ;
-    }
-    }
+    //    }
+    //private bool IsAddReport(Update update)
+    //{
+    //    return ;
+    //}
+    //}
 }

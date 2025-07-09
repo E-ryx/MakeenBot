@@ -4,6 +4,6 @@ namespace MakeenBot.Mappers
 {
     public class ReportMapper
     {
-        public ReportDto AddReport()
+        //public ReportDto AddReport();
     }
 }

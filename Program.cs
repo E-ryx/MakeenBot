@@ -7,6 +7,10 @@ using System.Net;
 using MakeenBot.Data;
 using Microsoft.EntityFrameworkCore;
 using MakeenBot.Models.ValueObjects;
+using MakeenBot.Interfaces.Services;
+using MakeenBot.Interfaces.Repositories;
+using MakeenBot.Interfaces.Validators;
+using MakeenBot.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +21,10 @@ builder.Services.Configure<BotConfig>(builder.Configuration.GetSection("BotConfi
 builder.Services.AddControllers();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IReportValidator, ReportValidator>();
+builder.Services.AddScoped<IExportService, ExportService>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
 // Add services to the container
 builder.Services.AddDbContext<BotDbContext>(options =>
@@ -25,7 +33,7 @@ builder.Services.AddDbContext<BotDbContext>(options =>
 var app = builder.Build();
 
 // Set Server Ip and Port.
-app.Urls.Add("https://*:" + builder.Configuration["Port"]);
+//app.Urls.Add("https://*:" + builder.Configuration["Port"]);
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();

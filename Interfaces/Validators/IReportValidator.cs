@@ -5,5 +5,5 @@ namespace MakeenBot.Interfaces.Validators;
 
 public interface IReportValidator
 {
-    ValidatorErrorMessage ValidateReport(string report);
+    Task<(ReportDto? Report, List<string> Errors)> ValidateAndParseAsync(string input, bool isEdit = false);
 }

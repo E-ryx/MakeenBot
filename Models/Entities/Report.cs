@@ -10,18 +10,26 @@
         public int StudentId { get; private set; }
         public Student Student { get; private set; }
 
-        public int CourseId { get; private set; }
-        public Course Course { get; private set; }
+        public bool IsFailed { get; private set; }
+
 
         private Report() { }
 
-        public Report(int reportNumber, int hours, DateTime date, int studentId, int courseId)
+        public Report(int reportNumber, int hours, int studentId)
         {
             ReportNumber = reportNumber;
             Hours = hours;
-            Date = date;
+            Date = DateTime.Now;
             StudentId = studentId;
-            CourseId = courseId;
+            //CourseId = courseId;
+            IsFailed = DateTime.Now.Hour >= 22;
         }
+        public void Update(int hours)
+        {
+            Hours = hours;
+            Date = DateTime.Now;
+            IsFailed = DateTime.Now.Hour >= 22;
+        }
+
     }
 }

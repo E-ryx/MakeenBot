@@ -6,7 +6,7 @@
             public string Name { get; private set; }
 
             public ICollection<Student> Students { get; private set; } = new List<Student>();
-            public ICollection<Report> Reports { get; private set; } = new List<Report>();
+            //public ICollection<Report> Reports { get; private set; } = new List<Report>();
 
             private Course() { }
 

@@ -16,26 +16,26 @@ namespace MakeenBot.Data
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            // Student -> Course (many-to-one)
-            modelBuilder.Entity<Student>()
-                .HasOne(s => s.Course)
-                .WithMany(c => c.Students)
-                .HasForeignKey(s => s.CourseId);
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    // Student -> Course (many-to-one)
+        //    modelBuilder.Entity<Student>()
+        //        .HasOne(s => s.Course)
+        //        .WithMany(c => c.Students)
+        //        .HasForeignKey(s => s.CourseId);
 
-            // Report -> Student (many-to-one)
-            modelBuilder.Entity<Report>()
-                .HasOne(r => r.Student)
-                .WithMany(s => s.Reports)
-                .HasForeignKey(r => r.StudentId);
+        //    // Report -> Student (many-to-one)
+        //    modelBuilder.Entity<Report>()
+        //        .HasOne(r => r.Student)
+        //        .WithMany(s => s.Reports)
+        //        .HasForeignKey(r => r.StudentId);
 
-            // Report -> Course (many-to-one)
-            modelBuilder.Entity<Report>()
-                .HasOne(r => r.Course)
-                .WithMany(c => c.Reports)
-                .HasForeignKey(r => r.CourseId);
-        }
+        //    // Report -> Course (many-to-one)
+        //    modelBuilder.Entity<Report>()
+        //        .HasOne(r => r.Course)
+        //        .WithMany(c => c.Reports)
+        //        .HasForeignKey(r => r.CourseId);
+        //}
 
     }
 }
