@@ -8,4 +8,5 @@ public class BotConfig
     public string BaleApi { get; set; }
     public string Webhook { get; set; }
     public long AuthorizedUserId { get; set; }
+    public int BotId { get; set; }
 }

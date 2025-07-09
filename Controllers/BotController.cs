@@ -49,6 +49,42 @@ public class BotController : ControllerBase
     [HttpPost("update")]
     public async Task<IActionResult> ReceiveUpdate([FromBody] Update update)
     {
+        // Welcome Message
+        //if (update.Type == UpdateType.MyChatMember && update.MyChatMember is { } myChatMember)
+        //{
+        //    var oldStatus = myChatMember.OldChatMember.Status;
+        //    var newStatus = myChatMember.NewChatMember.Status;
+
+        //    // بررسی اینکه ربات به گروه اضافه شده
+        //    if ((oldStatus == ChatMemberStatus.Left || oldStatus == ChatMemberStatus.Kicked) &&
+        //        (newStatus == ChatMemberStatus.Member || newStatus == ChatMemberStatus.Administrator))
+        //    {
+        //        var welcomePath = Path.Combine("Messages", "WelcomeMessage.md");
+        //        var welcomeText = await System.IO.File.ReadAllTextAsync(welcomePath);
+
+        //        await _bot.SendMessage(
+        //            chatId: myChatMember.Chat.Id,
+        //            text: welcomeText
+        //        );
+
+        //    }
+
+        //    return Ok(); // چون از نوع خاصیه، بعد از رسیدگی بلافاصله return کنیم
+        //}
+        if (update.Message?.NewChatMembers != null && update.Message.NewChatMembers.Any(b => b.IsBot && b.Id == _settings.BotId))
+        {
+            var chatId = update.Message.Chat.Id;
+            var welcomePath = Path.Combine("Messages", "WelcomeMessage.md");
+            var welcomeText = await System.IO.File.ReadAllTextAsync(welcomePath);
+
+            await _bot.SendMessage(
+                chatId: chatId,
+                text: welcomeText
+            );
+
+            return Ok();
+        }
+
         var message = update.Type switch
         {
             UpdateType.Message => update.Message,
@@ -63,14 +99,57 @@ public class BotController : ControllerBase
         if (string.IsNullOrWhiteSpace(text))
             return Ok();
 
-        // --- بررسی دسترسی ---
-        if (message.Chat.Type != ChatType.Private || message.From?.Id != _settings.AuthorizedUserId)
-            return Ok(); // دسترسی غیرمجاز
+        //// --- بررسی دسترسی ---
+        //if (message.Chat.Type != ChatType.Private || message.From?.Id != _settings.AuthorizedUserId)
+        //    return Ok(); // دسترسی غیرمجاز
+
+        if (text.StartsWith("/welcome-message", StringComparison.OrdinalIgnoreCase))
+        {
+            // فقط ادمین مجاز باشه
+            if (message.From?.Id != _settings.AuthorizedUserId)
+            {
+                //await _bot.SendMessage(message.Chat.Id, "⛔ شما اجازه‌ی تغییر پیام خوش‌آمدگویی را ندارید.");
+                return Ok();
+            }
+
+            var lines = text.Split('\n').ToList();
+            if (lines.Count < 2)
+            {
+                await _bot.SendMessage(message.Chat.Id, "❌ برای تنظیم پیام خوش‌آمدگویی، لطفاً دستور را به این صورت بنویسید:\n\n/welcome-message\nمتن پیام شما");
+                return Ok();
+            }
+
+            var newMessage = string.Join('\n', lines.Skip(1)).Trim();
+
+            var welcomePath = Path.Combine("Messages", "WelcomeMessage.md");
+
+            try
+            {
+                Directory.CreateDirectory("Messages"); // اطمینان از وجود پوشه
+                await System.IO.File.WriteAllTextAsync(welcomePath, newMessage);
+
+                await _bot.SendMessage(message.Chat.Id, "✅ پیام خوش‌آمدگویی با موفقیت ذخیره شد.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطا در ذخیره پیام خوش‌آمدگویی");
+                await _bot.SendMessage(message.Chat.Id, "❌ خطایی در ذخیره پیام رخ داد.");
+            }
+
+            return Ok();
+        }
+
 
         try
         {
             if (text.StartsWith("/گزارش خروجی"))
             {
+            // فقط ادمین مجاز باشه
+            if (message.From?.Id != _settings.AuthorizedUserId)
+            {
+                await _bot.SendMessage(message.Chat.Id, "⛔ شما اجازه‌ی تغییر پیام خوش‌آمدگویی را ندارید.");
+                return Ok();
+            }
                 var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
                 var courseName = lines.FirstOrDefault(l => l.StartsWith("دوره:"))?.Split(':')[1].Trim();
                 var fromDateStr = lines.FirstOrDefault(l => l.StartsWith("از:"))?.Split(':')[1].Trim();
