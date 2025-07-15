@@ -5,6 +5,7 @@
     using Microsoft.Extensions.Options;
     using Microsoft.Extensions.Logging;
     using MakeenBot.Interfaces.Handlers;
+using MakeenBot.Models;
 
 namespace MakeenBot.Handlers.WelcomeMessage
 {

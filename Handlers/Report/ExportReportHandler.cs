@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using System.Globalization;
 using Telegram.Bot.Types;
 using Telegram.Bot;
+using MakeenBot.Models;
 
 namespace MakeenBot.Handlers.Report
 {

@@ -16,6 +16,7 @@ using MakeenBot.Handlers.WelcomeMessage;
 using MakeenBot.Handlers.Course;
 using MakeenBot.Handlers.Report;
 using MakeenBot.Handlers.HelpMessage;
+using MakeenBot.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

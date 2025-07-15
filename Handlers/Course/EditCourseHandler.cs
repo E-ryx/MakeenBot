@@ -4,6 +4,7 @@ using MakeenBot.Models.ValueObjects;
 using Microsoft.Extensions.Options;
 using Telegram.Bot.Types;
 using Telegram.Bot;
+using MakeenBot.Models;
 
 namespace MakeenBot.Handlers.Course
 {
