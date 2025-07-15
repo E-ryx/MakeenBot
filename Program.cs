@@ -15,7 +15,7 @@ using MakeenBot.Interfaces.Handlers;
 using MakeenBot.Handlers.WelcomeMessage;
 using MakeenBot.Handlers.Course;
 using MakeenBot.Handlers.Report;
-using MakeenBot.Handlers.StartMessage;
+using MakeenBot.Handlers.HelpMessage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,7 +42,7 @@ builder.Services.AddScoped<IBotCommandHandler, AddCourseHandler>();
 builder.Services.AddScoped<IBotCommandHandler, EditCourseHandler>();
 builder.Services.AddScoped<IBotCommandHandler, ExportReportHandler>();
 builder.Services.AddScoped<IBotCommandHandler, AddReportHandler>();
-builder.Services.AddScoped<IBotCommandHandler, StartMessageHandler>();
+builder.Services.AddScoped<IBotCommandHandler, HelpMessageHandler>();
 
 
 // DbContext

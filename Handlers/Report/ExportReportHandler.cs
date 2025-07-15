@@ -65,14 +65,23 @@ namespace MakeenBot.Handlers.Report
                         return;
                     }
 
-                    stream.Position = 0;
-
-                    await _bot.SendDocument(
+                if (stream.Length > 20 * 1024 * 1024) // 20MB
+                {
+                    await _bot.SendMessage(
                         chatId: message.Chat.Id,
-                        document: new InputFileStream(stream, $"{courseName}.xlsx"),
-                        caption: $"📤 گزارش از {fromDateStr} تا {toDateStr}"
+                        text: "❌ حجم فایل گزارش بیش از حد مجاز تلگرام است."
                     );
+                    return;
                 }
+
+                stream.Position = 0;
+
+                //await _bot.SendDocument(
+                //    chatId: message.Chat.Id,
+                //    document: new InputFileStream(stream, $"{courseName}.xlsx"),
+                //    caption: $"📤 گزارش از {fromDateStr} تا {toDateStr}"
+                //);
+            }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "خطا در تولید گزارش");
