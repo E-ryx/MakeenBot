@@ -367,3 +367,10 @@ FodyWeavers.xsd
 
 # VS Code Settings.
 /.vscode
+
+# Local appsettings (sensitive configs)
+/appsettings.json
+appsettings.Development.json
+appsettings.Local.json
+appsettings.Staging.json
+secrets.json
