@@ -1,14 +1,30 @@
-# MakeenBot (ASP.NET Core Web API)
-#### Developed a Bale bot to streamline employees report submissions and **automate** HR report retrieval.
+# 🤖 MakeenBot (ASP.NET Core Web API)
 
-- The bot accepts structured messages from employees via webhook,
-validates input using **regex-based message validators**, and **stores**
-valid reports in a **SQL Server database.** HR personnel can request
-and receive **Excel exports** of stored reports directly through the bot.
-- Implemented a **clean, layered architecture** with a dedicated update
-controller (for handling webhook payloads), a message handler (to
-route actions like adding/editing/viewing reports), and use-casespecific services. Followed **SOLID principles** by separating concerns
-into **validation, processing,** and **data access layers,** with **repository
-classes** managing database operations. Focused on **maintainability**
-and **extensibility**, enabling **easy adaptation** for future workflows or
-additional roles.
+A smart Bale bot built to **streamline employee report submissions** and **automate HR report retrieval**.  
+
+---
+
+### 🛠️ Key Features
+
+- 📩 Accepts structured report messages from employees via **webhooks**
+- 🧹 Validates input using **regex-based validators**
+- 💾 Saves valid reports in a **SQL Server** database
+- 📊 Allows HR personnel to **request and receive Excel exports** directly through the bot
+
+---
+
+### 🧱 Architecture Highlights
+
+- ✅ Built using a **clean, layered architecture** for maintainability and scalability
+- 🔄 A dedicated **Update Controller** handles incoming webhook payloads  
+- 🧠 A **Message Handler** routes actions like adding, editing, and viewing reports  
+- 🧰 Task-specific services encapsulate logic for core functionalities  
+- 🧪 Follows **SOLID principles** with clear separation of:
+  - **Validation**
+  - **Processing**
+  - **Data Access**
+
+- 🗄️ Uses **repository classes** to manage all database interactions  
+- 🔧 Designed for **extensibility**—easily adaptable to new workflows or additional roles
+
+---
