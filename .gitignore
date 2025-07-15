@@ -369,7 +369,7 @@ FodyWeavers.xsd
 /.vscode
 
 # Local appsettings (sensitive configs)
-/appsettings.json
+appsettings.json
 appsettings.Development.json
 appsettings.Local.json
 appsettings.Staging.json
