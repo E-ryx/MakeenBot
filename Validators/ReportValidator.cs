@@ -22,7 +22,6 @@ public class ReportValidator : IReportValidator
             Date = DateTime.Now
         };
 
-        // نام دانشجو
         var nameMatch = Regex.Match(input, @"نام و نام خانوادگی:\s*#([\u0600-\u06FF_]+)");
         if (!nameMatch.Success)
         {
@@ -39,7 +38,6 @@ public class ReportValidator : IReportValidator
             return (null, errors);
         }
 
-        // شماره گزارش
         var numberMatch = Regex.Match(input, @"شماره گزارش:\s*([\d۰-۹0-9]+)");
         if (!numberMatch.Success)
             errors.Add("❌ شماره گزارش به درستی وارد نشده است.");
@@ -63,7 +61,6 @@ public class ReportValidator : IReportValidator
             }
         }
 
-        // مجموع ساعت
         var hourMatch = Regex.Match(input, @"مجموع ساعت:\s*([\d۰-۹0-9]+)");
         if (!hourMatch.Success)
             errors.Add("❌ مجموع ساعت به درستی وارد نشده است.");

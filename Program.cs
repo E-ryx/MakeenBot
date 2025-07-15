@@ -52,9 +52,6 @@ builder.Services.AddDbContext<BotDbContext>(options =>
 
 var app = builder.Build();
 
-// Set Server Ip and Port.
-//app.Urls.Add("https://*:" + builder.Configuration["Port"]);
-
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
 app.UseAuthorization();

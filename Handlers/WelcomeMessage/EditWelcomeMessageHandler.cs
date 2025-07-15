@@ -47,7 +47,7 @@ namespace MakeenBot.Handlers.WelcomeMessage
             }
 
             var newText = string.Join('\n', lines.Skip(1)).Trim();
-            var path = Path.Combine("Messages", "WelcomeMessage.md");
+            var path = Path.Combine("Messages", "WelcomeMessage.txt");
 
             try
             {

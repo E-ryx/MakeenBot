@@ -4,9 +4,6 @@
     {
         public int Id { get; private set; }
         public string Name { get; private set; }
-        //public string BaleId { get; private set; }
-        //public string PhoneNumber { get; set; }
-
         public int CourseId { get; private set; }
         public Course Course { get; private set; }
 

@@ -77,11 +77,11 @@ namespace MakeenBot.Handlers.Report
 
                 stream.Position = 0;
 
-                //await _bot.SendDocument(
-                //    chatId: message.Chat.Id,
-                //    document: new InputFileStream(stream, $"{courseName}.xlsx"),
-                //    caption: $"📤 گزارش از {fromDateStr} تا {toDateStr}"
-                //);
+                await _bot.SendDocument(
+                   chatId: message.Chat.Id,
+                   document: new InputFileStream(stream, $"{courseName}.xlsx"),
+                   caption: $"📤 گزارش از {fromDateStr} تا {toDateStr}"
+                );
             }
                 catch (Exception ex)
                 {

@@ -42,11 +42,10 @@ public class BotController : ControllerBase
     {
         try
         {
-            // 1️⃣ پیام خوش‌آمدگویی هنگام اضافه شدن ربات
             if (update.Message?.NewChatMembers != null &&
                 update.Message.NewChatMembers.Any(m => m.IsBot && m.Id == _settings.BotId))
             {
-                var welcomePath = Path.Combine("Messages", "WelcomeMessage.md");
+                var welcomePath = Path.Combine("Messages", "WelcomeMessage.txt");
                 var welcomeText = await System.IO.File.ReadAllTextAsync(welcomePath);
 
                 await _bot.SendMessage(
@@ -58,7 +57,6 @@ public class BotController : ControllerBase
                 return Ok();
             }
 
-            // 2️⃣ بررسی نوع آپدیت و متن پیام
             var message = update.Type switch
             {
                 UpdateType.Message => update.Message,
@@ -69,7 +67,6 @@ public class BotController : ControllerBase
             if (message == null || string.IsNullOrWhiteSpace(message.Text))
                 return Ok();
 
-            // 3️⃣ سپردن به CommandHandler مناسب
             foreach (var handler in _commandHandlers)
             {
                 if (handler.CanHandle(message.Text))
@@ -79,7 +76,7 @@ public class BotController : ControllerBase
                 }
             }
 
-            return Ok(); // پیام‌هایی که نیاز به پاسخ ندارند
+            return Ok();
         }
         catch (Exception ex)
         {

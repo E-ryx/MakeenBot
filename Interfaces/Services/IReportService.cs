@@ -6,6 +6,5 @@ namespace MakeenBot.Interfaces.Services
     {
         Task<MemoryStream?> ExportReportsToExcelAsync(string courseName, DateTime startDate, DateTime endDate);
         Task<(bool IsSuccess, string Message)> HandleReportSubmissionAsync(string messageText, bool isEdit = false);
-
     }
 }

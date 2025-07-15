@@ -28,10 +28,6 @@ public class ReportService : IReportService
         _reportRepository = reportRepository;
         _courseRepository = courseRepository;
     }
-
-    // ------------------------------
-    // ✅ ثبت یا ویرایش گزارش روزانه
-    // ------------------------------
     public async Task<(bool IsSuccess, string Message)> HandleReportSubmissionAsync(string messageText, bool isEdit = false)
     {
         var (reportDto, errors) = await _validator.ValidateAndParseAsync(messageText, isEdit);
@@ -79,9 +75,6 @@ public class ReportService : IReportService
         }
     }
 
-    // ------------------------------
-    // ✅ تولید خروجی اکسل از گزارش‌ها
-    // ------------------------------
     public async Task<MemoryStream?> ExportReportsToExcelAsync(string courseName, DateTime startDate, DateTime endDate)
     {
         var course = await _courseRepository.GetByNameAsync(courseName);

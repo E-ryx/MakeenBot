@@ -52,7 +52,6 @@ namespace MakeenBot.Handlers.Course
                 return;
             }
 
-            // بررسی تکراری بودن دوره
             if (await _courseRepository.ExistsAsync(courseName))
             {
                 await _bot.SendMessage(message.Chat.Id, $"⚠️ دوره‌ای با نام «{courseName}» از قبل وجود دارد.");
@@ -71,7 +70,6 @@ namespace MakeenBot.Handlers.Course
                 return;
             }
 
-            // ثبت دوره جدید
             var course = new Models.Entities.Course(courseName);
             foreach (var studentName in studentLines)
             {
